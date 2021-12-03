@@ -1,7 +1,7 @@
-export const GAS_FOR_CLAIM = 135_000;
+export const GAS_FOR_CLAIM = {SEFI: 131_000, OTHER: 113_000};
 export const PROPOSAL_BASE_FEE = 10_000;
-export const GAS_FOR_EARN_DEPOSIT = 200_000;
-export const GAS_FOR_EARN_WITHDRAW = 200_000;
+export const GAS_FOR_EARN_DEPOSIT = {SEFI: 132_000, OTHER: 114_000};
+export const GAS_FOR_EARN_WITHDRAW ={SEFI: 131_000, OTHER: 113_000};
 export const GAS_FOR_CREATE_PAIR = 350_000;
 export const GAS_FOR_PROVIDE = 125_000;
 export const GAS_FOR_APPROVE = 75_000;

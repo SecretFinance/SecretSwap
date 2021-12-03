@@ -1,14 +1,15 @@
 import { Redeem } from '../../../blockchain-bridge/scrt';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as styles from './styles.styl';
 import { Button, Icon, Popup } from 'semantic-ui-react';
 import { useStores } from 'stores';
 import { AsyncSender } from '../../../blockchain-bridge/scrt/asyncSender';
-import { toUscrtFee, unlockToken } from 'utils';
+import { unlockToken } from 'utils';
 import { unlockJsx } from 'pages/Swap/utils';
 import { formatSignificantFigures } from '../../../utils';
 import Loader from 'react-loader-spinner';
-import { GAS_FOR_CLAIM, PROPOSAL_BASE_FEE } from '../../../utils/gasPrices';
+import { getGasFee } from './gasFunctions';
+import { GAS_FOR_CLAIM } from 'utils/gasPrices';
 
 const ClaimButton = (props: {
   secretjs: AsyncSender;
@@ -23,10 +24,6 @@ const ClaimButton = (props: {
 }) => {
   const { user, theme } = useStores();
   const [loading, setLoading] = useState<boolean>(false);
-  const [fee, setFee] = useState({
-    amount: [{ amount: toUscrtFee(GAS_FOR_CLAIM), denom: 'uscrt' }],
-    gas: String(GAS_FOR_CLAIM),
-  } as any);
 
   const displayAvailable = () => {
     if (props.available === unlockToken) {
@@ -61,24 +58,6 @@ const ClaimButton = (props: {
     }
   };
 
-  const setGasFee = () => {
-    const activeProposals = user.numOfActiveProposals;
-    const { rewardsContract } = props;
-    const newPoolContract = process.env.SEFI_STAKING_CONTRACT;
-    if (rewardsContract === newPoolContract && activeProposals > 0) {
-      let fee = {
-        amount: [{ amount: toUscrtFee(GAS_FOR_CLAIM + PROPOSAL_BASE_FEE * activeProposals), denom: 'uscrt' }],
-        gas: GAS_FOR_CLAIM + PROPOSAL_BASE_FEE * activeProposals,
-      };
-      setFee(fee);
-    }
-  };
-
-  useEffect(() => {
-    setGasFee();
-    //eslint-disable-next-line
-  }, [user.numOfActiveProposals]);
-
   return (
     <>
       <div className={`${styles.claim_label} ${styles[theme.currentTheme]}`}>
@@ -96,7 +75,7 @@ const ClaimButton = (props: {
               secretjs: props.secretjs,
               address: props.contract,
               amount: '0',
-              fee,
+              fee: getGasFee(GAS_FOR_CLAIM, props.rewardsContract, user.numOfActiveProposals),
             });
 
             props.notify('success', `Claimed ${props.available} ${props.rewardsToken}`);

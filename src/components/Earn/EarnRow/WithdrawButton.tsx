@@ -1,38 +1,16 @@
 import { emergencyRedeem, Redeem } from '../../../blockchain-bridge/scrt';
-import React, { useEffect, useState } from 'react';
-import { toUscrtFee, valueToDecimals } from '../../../utils';
+import React, { useState } from 'react';
+import { valueToDecimals } from '../../../utils';
 import * as styles from './styles.styl';
 import { Button } from 'semantic-ui-react';
 import { useStores } from 'stores';
-import { GAS_FOR_EARN_WITHDRAW, PROPOSAL_BASE_FEE } from '../../../utils/gasPrices';
+import { GAS_FOR_EARN_WITHDRAW } from '../../../utils/gasPrices';
+import { getGasFee } from './gasFunctions';
 
 const WithdrawButton = ({ props, value, changeValue }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const amount = Number(value).toFixed(6);
   const { theme, user } = useStores();
-
-  const [fee, setFee] = useState({
-    amount: [{ amount: toUscrtFee(GAS_FOR_EARN_WITHDRAW), denom: 'uscrt' }],
-    gas: String(GAS_FOR_EARN_WITHDRAW),
-  } as any);
-
-  const activeProposals = user.numOfActiveProposals;
-  const rewardsContact = props.token.rewardsContract;
-  const newPoolContract = process.env.SEFI_STAKING_CONTRACT;
-
-  const setGasFee = () => {
-    if (rewardsContact === newPoolContract && activeProposals > 0) {
-      let fee = {
-        amount: [{ amount: toUscrtFee(GAS_FOR_EARN_WITHDRAW + PROPOSAL_BASE_FEE * activeProposals), denom: 'uscrt' }],
-        gas: String(GAS_FOR_EARN_WITHDRAW + PROPOSAL_BASE_FEE * activeProposals),
-      };
-      setFee(fee);
-    }
-  };
-
-  useEffect(() => {
-    setGasFee();
-  }, [activeProposals]);
 
   return (
     <Button
@@ -44,13 +22,13 @@ const WithdrawButton = ({ props, value, changeValue }) => {
           ? emergencyRedeem({
               secretjs: props.userStore.secretjsSend,
               address: props.token.rewardsContract,
-              fee,
+              fee: getGasFee(GAS_FOR_EARN_WITHDRAW, props.token.rewardsContract, user.numOfActiveProposals),
             })
           : Redeem({
               secretjs: props.userStore.secretjsSend,
               address: props.token.rewardsContract,
               amount: valueToDecimals(amount, props.token.decimals),
-              fee,
+              fee: getGasFee(GAS_FOR_EARN_WITHDRAW, props.token.rewardsContract, user.numOfActiveProposals),
             });
 
         await redeemTask

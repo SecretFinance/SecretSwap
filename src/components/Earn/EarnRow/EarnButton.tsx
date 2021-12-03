@@ -1,42 +1,18 @@
 import { DepositRewards } from '../../../blockchain-bridge/scrt';
-import React, { useEffect, useState } from 'react';
-import { toUscrtFee, valueToDecimals } from '../../../utils';
-import cn from 'classnames';
+import React, { useState } from 'react';
+import { valueToDecimals } from '../../../utils';
 import * as styles from './styles.styl';
 import { Button } from 'semantic-ui-react';
 import { unlockToken } from '../../../utils';
 import { useStores } from 'stores';
-import moment from 'moment';
-import { GAS_FOR_CLAIM, PROPOSAL_BASE_FEE, GAS_FOR_EARN_DEPOSIT } from '../../../utils/gasPrices';
+import { GAS_FOR_EARN_DEPOSIT } from '../../../utils/gasPrices';
+import { getGasFee } from './gasFunctions';
 
 // todo: add failed toast or something
 const EarnButton = ({ props, value, changeValue, togglePulse, setPulseInterval }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const amount = Number(value).toFixed(6);
   const { theme, user } = useStores();
-
-  const [fee, setFee] = useState({
-    amount: [{ amount: toUscrtFee(GAS_FOR_EARN_DEPOSIT), denom: 'uscrt' }],
-    gas: String(GAS_FOR_EARN_DEPOSIT),
-  } as any);
-
-  const activeProposals = user.numOfActiveProposals;
-  const rewardsContact = props.token.rewardsContract;
-  const newPoolContract = process.env.SEFI_STAKING_CONTRACT;
-
-  const setGasFee = () => {
-    if (rewardsContact === newPoolContract && activeProposals > 0) {
-      let fee = {
-        amount: [{ amount: toUscrtFee(GAS_FOR_CLAIM + PROPOSAL_BASE_FEE * activeProposals), denom: 'uscrt' }],
-        gas: GAS_FOR_CLAIM + PROPOSAL_BASE_FEE * activeProposals,
-      };
-      setFee(fee);
-    }
-  };
-
-  useEffect(() => {
-    setGasFee();
-  }, [activeProposals]);
 
   return (
     <Button
@@ -51,7 +27,7 @@ const EarnButton = ({ props, value, changeValue, togglePulse, setPulseInterval }
           address: props.token.lockedAssetAddress,
           // maximum precision for the contract is 6 decimals
           amount: valueToDecimals(amount, props.token.decimals),
-          fee,
+          fee: getGasFee(GAS_FOR_EARN_DEPOSIT, props.token.rewardsContract, user.numOfActiveProposals),
         })
           .then(_ => {
             changeValue({
