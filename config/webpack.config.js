@@ -65,6 +65,7 @@ const config = isProduction ? configProd : configDev;
 
 module.exports = {
   // context: sourcePath,
+  mode: 'production',
   entry: config.app,
   output: {
     filename: config.appFilename,

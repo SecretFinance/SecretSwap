@@ -90,6 +90,23 @@ export function formatWithTwoDecimalsRub(value: number) {
   return `${formatWithTwoDecimals(value)} ₽`;
 }
 
+/**
+ * This function will chop off decimals, but not chop off integers,
+ * so that there are no more than `sigFigs` digits, unless there are a lot of integer digits.
+ * Examples with sigFigs=6:
+ * 1.234567 => 1.23457
+ * 123.456789 => 123.457
+ * 123456789.123456 => 123456789
+ */
+export function formatSignificantFigures(value: number | string, sigFigs: number) {
+  value = Number(value);
+
+  let maxFractionDigits = sigFigs - 1 - Math.floor(Math.log10(value));
+  maxFractionDigits = Math.max(0, maxFractionDigits);
+
+  return new Intl.NumberFormat('en-US', {maximumFractionDigits: maxFractionDigits}).format(value);
+}
+
 export function ones(value: number | string) {
   return Number(value) / 1e18;
 }

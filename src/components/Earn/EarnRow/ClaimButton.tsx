@@ -6,6 +6,8 @@ import { useStores } from 'stores';
 import { AsyncSender } from '../../../blockchain-bridge/scrt/asyncSender';
 import { toUscrtFee, unlockToken } from 'utils';
 import { unlockJsx } from 'pages/Swap/utils';
+import { formatSignificantFigures } from '../../../utils';
+import Loader from 'react-loader-spinner';
 import { GAS_FOR_CLAIM, PROPOSAL_BASE_FEE } from '../../../utils/gasPrices';
 
 const ClaimButton = (props: {
@@ -49,7 +51,13 @@ const ClaimButton = (props: {
         </div>
       );
     } else {
-      return <strong>{props?.available}</strong>;
+      return props.available ? (
+        <strong>{formatSignificantFigures(props.available, 6)}</strong>
+      ) : (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Loader type="ThreeDots" color="#ff726e" height="0.2em" />
+        </div>
+      );
     }
   };
 
