@@ -122,11 +122,11 @@ function getClientEnvironment(publicUrl) {
         SUSHI_API: process.env.SUSHI_API,
         GET_TOKENS_SERVICE: process.env.GET_TOKENS_SERVICE,
 
-        TEST_COINS: !!process.env.TEST_COINS,
+        TEST_COINS: process.env.TEST_COINS === 'true',
         SIG_THRESHOLD: process.env.SIG_THRESHOLD,
         LEADER_ACCOUNT_ETH: process.env.LEADER_ACCOUNT_ETH,
         LEADER_ACCOUNT_BSC: process.env.LEADER_ACCOUNT_BSC,
-        
+
         IS_MAINTENANCE: process.env.IS_MAINTENANCE,
       },
     );
